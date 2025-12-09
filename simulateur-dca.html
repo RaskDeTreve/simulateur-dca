@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simulateur DCA</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+
+    <div style="max-width:600px;margin:auto;padding:20px;background:#fff;border-radius:12px;box-shadow:0 4px 12px rgba(0,0,0,0.08);font-family:'Source Sans Pro',sans-serif;">
+        <h2>💰 Simulateur DCA (Dollar Cost Averaging)</h2>
+        
+        <label for="dcaCapital">Capital initial (€):</label>
+        <input type="number" id="dcaCapital" value="10000" style="width:100%;padding:10px;margin:6px 0;border:1px solid #ddd;border-radius:8px;">
+        
+        <label for="dcaVersement">Versement mensuel (€):</label>
+        <input type="number" id="dcaVersement" value="200" style="width:100%;padding:10px;margin:6px 0;border:1px solid #ddd;border-radius:8px;">
+        
+        <label for="dcaRendement">Rendement annuel (%) :</label>
+        <input type="number" id="dcaRendement" value="7" step="0.1" style="width:100%;padding:10px;margin:6px 0;border:1px solid #ddd;border-radius:8px;">
+        
+        <label for="dcaAnnees">Durée (années):</label>
+        <input type="number" id="dcaAnnees" value="20" style="width:100%;padding:10px;margin:6px 0;border:1px solid #ddd;border-radius:8px;">
+        
+        <button onclick="calculerDCA()" style="width:100%;padding:12px;background:#007BFF;color:white;border:none;border-radius:10px;cursor:pointer;font-size:16px;margin-top:10px;">
+            Calculer
+        </button>
+        
+        <div id="dcaResultat" style="margin-top:20px;font-weight:bold;text-align:center;"></div>
+        
+        <canvas id="dcaChart" style="margin-top:25px;max-height:400px;"></canvas>
+    </div>
+
+    <script>
+        function calculerDCA() {
+            // ... (Votre fonction JavaScript complète ici) ...
+            let capital = parseFloat(document.getElementById("dcaCapital").value);
+            let versement = parseFloat(document.getElementById("dcaVersement").value);
+            let taux = parseFloat(document.getElementById("dcaRendement").value) / 100;
+            let annees = parseInt(document.getElementById("dcaAnnees").value);
+
+            let labels = [];
+            let evolution = [];
+            let montant = capital;
+
+            for (let an = 1; an <= annees; an++) {
+                // Cette boucle calcule par mois, ce qui est plus précis.
+                for (let mois = 1; mois <= 12; mois++) {
+                    montant = montant * (1 + taux / 12) + versement;
+                }
+                labels.push("Année " + an);
+                // On pousse l'évolution à la fin de chaque année
+                evolution.push(montant.toFixed(2)); 
+            }
+
+            document.getElementById("dcaResultat").innerHTML = 
+                "📈 Capital final après " + annees + " ans : <b>" + montant.toLocaleString("fr-FR", { minimumFractionDigits: 2 }) + " €</b>";
+
+            const ctx = document.getElementById("dcaChart").getContext("2d");
+            if (window.dcaChart instanceof Chart) window.dcaChart.destroy();
+            window.dcaChart = new Chart(ctx, {
+                type: "line",
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: "Capital (€)",
+                        data: evolution,
+                        borderColor: "#007BFF",
+                        backgroundColor: "rgba(0,123,255,0.2)",
+                        fill: true,
+                        tension: 0.25
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    scales: { y: { beginAtZero: true } },
+                    plugins: { legend: { display: false } }
+                }
+            });
+        }
+        // Exécuter le calcul initial au chargement pour afficher un graphique par défaut
+        window.onload = calculerDCA; 
+    </script>
+</body>
+</html>
